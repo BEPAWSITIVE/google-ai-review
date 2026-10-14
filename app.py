@@ -84,13 +84,41 @@ class ClientSyncItem(BaseModel):
     brand_color: Optional[str] = "#2563eb"
     welcome_msg: Optional[str] = "Thank you for visiting!"
 
+import requests
+
 # Web Pages
 @app.get("/", response_class=HTMLResponse)
 async def dashboard_page(request: Request):
-    clients = database.list_clients()
-    api_key = database.get_setting("gemini_api_key", "")
-    is_key_set = bool(api_key.strip())
-    masked_key = (api_key[:4] + "..." + api_key[-4:]) if len(api_key) > 8 else ("Set" if is_key_set else "")
+    api_url = os.environ.get("API_URL")
+    clients = []
+    is_key_set = False
+    masked_key = ""
+
+    if api_url:
+        try:
+            res = requests.get(f"{api_url.rstrip('/')}/clients", timeout=3)
+            if res.status_code == 200:
+                clients = res.json()
+        except Exception:
+            pass
+
+        try:
+            res = requests.get(f"{api_url.rstrip('/')}/config", timeout=3)
+            if res.status_code == 200:
+                cfg = res.json()
+                is_key_set = cfg.get("has_gemini_key", False)
+                masked_key = cfg.get("masked_key", "")
+        except Exception:
+            pass
+
+    if not clients:
+        clients = database.list_clients()
+
+    if not masked_key and not is_key_set:
+        api_key = database.get_setting("gemini_api_key", "")
+        is_key_set = bool(api_key.strip())
+        masked_key = (api_key[:4] + "..." + api_key[-4:]) if len(api_key) > 8 else ("Set" if is_key_set else "")
+
     return templates.TemplateResponse(
         request=request,
         name="dashboard.html",
@@ -105,7 +133,22 @@ async def dashboard_page(request: Request):
 @app.get("/r/{slug}", response_class=HTMLResponse)
 @app.get("/review/{slug}", response_class=HTMLResponse)
 async def customer_review_page(request: Request, slug: str, d: Optional[str] = None):
-    client = database.get_client_by_slug(slug, fallback_payload=d)
+    client = None
+    api_url = os.environ.get("API_URL")
+    if api_url:
+        try:
+            res = requests.get(f"{api_url.rstrip('/')}/clients", timeout=3)
+            if res.status_code == 200:
+                for c in res.json():
+                    if c.get("slug") == slug:
+                        client = c
+                        break
+        except Exception:
+            pass
+
+    if not client:
+        client = database.get_client_by_slug(slug, fallback_payload=d)
+
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
     
@@ -126,7 +169,22 @@ async def customer_review_page(request: Request, slug: str, d: Optional[str] = N
 
 @app.get("/flyer/{slug}", response_class=HTMLResponse)
 async def printable_flyer_page(request: Request, slug: str, d: Optional[str] = None):
-    client = database.get_client_by_slug(slug, fallback_payload=d)
+    client = None
+    api_url = os.environ.get("API_URL")
+    if api_url:
+        try:
+            res = requests.get(f"{api_url.rstrip('/')}/clients", timeout=3)
+            if res.status_code == 200:
+                for c in res.json():
+                    if c.get("slug") == slug:
+                        client = c
+                        break
+        except Exception:
+            pass
+
+    if not client:
+        client = database.get_client_by_slug(slug, fallback_payload=d)
+
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
     
