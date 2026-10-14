@@ -1,0 +1,141 @@
+@page {
+  size: A4 portrait;
+  margin: 1.5cm;
+}
+
+body.flyer-body {
+  background: #ffffff;
+  color: #0f172a;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.flyer-wrapper {
+  max-width: 650px;
+  margin: 0 auto;
+  border: 2px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+}
+
+.flyer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.35rem 0.9rem;
+  border-radius: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.25rem;
+}
+
+.flyer-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.flyer-subtitle {
+  font-size: 1.15rem;
+  color: #475569;
+  margin-bottom: 1rem;
+}
+
+.flyer-stars {
+  color: #f59e0b;
+  font-size: 2.2rem;
+  letter-spacing: 0.4rem;
+  margin-bottom: 1.5rem;
+}
+
+.flyer-qr-container {
+  display: inline-block;
+  background: #ffffff;
+  padding: 1.5rem;
+  border: 3px solid #0f172a;
+  border-radius: 24px;
+  margin: 0 auto 1.5rem auto;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+.flyer-qr-container img {
+  width: 220px;
+  height: 220px;
+  display: block;
+}
+
+.flyer-cta {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1.25rem;
+}
+
+.flyer-steps {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  text-align: left;
+  max-width: 480px;
+  margin: 1.5rem auto 0 auto;
+  border-top: 1px dashed #cbd5e1;
+  padding-top: 1.5rem;
+}
+
+.flyer-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.step-num {
+  background: #0f172a;
+  color: #ffffff;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.step-text {
+  font-size: 0.85rem;
+  color: #334155;
+  line-height: 1.35;
+}
+
+.no-print-bar {
+  background: #0f172a;
+  color: #ffffff;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+@media print {
+  .no-print-bar {
+    display: none !important;
+  }
+  .flyer-wrapper {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+}

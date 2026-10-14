@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Review {{ client.name }} on Google</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    :root {
+      --primary: {{ client.brand_color if client.brand_color else '#2563eb' }};
+    }
+  </style>
+</head>
+<body class="review-app-body">
+
+  <div class="review-container">
+    <!-- Business Hero Card -->
+    <div class="review-hero">
+      <h1 class="review-biz-name">{{ client.name }}</h1>
+      <span class="client-category" style="margin-bottom: 0.5rem;">{{ client.category }}</span>
+      <div class="review-stars">★★★★★</div>
+      <p class="review-welcome-text">{{ client.welcome_msg }}</p>
+    </div>
+
+    <!-- Step Helper Banner -->
+    <div class="step-banner">
+      <span>💡</span>
+      <span>Tap any review draft below to select &amp; copy. Edit anytime, then tap Next to post on Google!</span>
+    </div>
+
+    <!-- Customer Highlight Tags -->
+    {% if tags and tags|length > 0 %}
+    <div class="tag-section-title">
+      <span>What stood out most?</span>
+      <span style="font-size: 0.725rem; font-weight: normal; text-transform: none; color: #64748b;">(optional)</span>
+    </div>
+    <div class="tag-cloud">
+      {% for tag in tags %}
+      <div class="tag-chip" data-tag="{{ tag }}">{{ tag }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Revert Options Section -->
+    <div class="revert-list-header">
+      <div>
+        <h3>
+          <span>✨ Review Suggestions</span>
+        </h3>
+        <div id="aiStatusBadge" style="font-size: 0.75rem; color: #64748b; margin-top: 0.15rem;">
+          Generating tailored drafts...
+        </div>
+      </div>
+      <button class="btn btn-secondary btn-sm" id="regenerateBtn" title="Generate fresh review variations">
+        🔄 Regenerate
+      </button>
+    </div>
+
+    <!-- 5 to 10 Review Cards Container -->
+    <div class="revert-cards-list" id="revertCardsList">
+      <!-- Injected via JavaScript -->
+    </div>
+
+    <!-- Editable Customization Preview -->
+    <div class="custom-edit-container">
+      <div class="custom-edit-label">
+        <span>✏️ Selected Review (Feel free to edit)</span>
+      </div>
+      <textarea id="customReviewText" class="custom-textarea" placeholder="Your chosen review will appear here. You can tweak it anytime before posting..."></textarea>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.4rem;">
+        <span style="font-size: 0.75rem; color: #64748b;">Tapping "Next" will automatically copy this text.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticky Bottom Dock -->
+  <div class="sticky-bottom-dock">
+    <div class="dock-inner">
+      <button class="btn-copy-dock" id="btnCopyDock" type="button" title="Copy text to clipboard">
+        📋 Copy
+      </button>
+      <button class="btn-proceed" id="btnProceed" type="button">
+        <span>Next: Post on Google</span>
+        <span>➔</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    window.CLIENT_SLUG = "{{ client.slug }}";
+    window.GOOGLE_REVIEW_URL = "{{ client.google_review_url }}";
+    window.CLIENT_PAYLOAD = "{{ payload }}";
+  </script>
+  <script src="/static/js/review.js"></script>
+</body>
+</html>

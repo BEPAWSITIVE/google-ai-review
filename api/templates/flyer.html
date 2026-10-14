@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Review Us Flyer - {{ client.name }}</title>
+  <link rel="stylesheet" href="/static/css/print.css">
+  <style>
+    .brand-accent {
+      color: {{ client.brand_color if client.brand_color else '#2563eb' }};
+    }
+  </style>
+</head>
+<body class="flyer-body">
+
+  <!-- Floating Bar for Screen View -->
+  <div class="no-print-bar">
+    <div>
+      <strong>Printable Table Tent / Poster Flyer</strong> (A4 or Counter Stand)
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+      <button onclick="window.print()" style="background: #2563eb; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer;">
+        🖨️ Print / Save as PDF
+      </button>
+      <a href="/" style="background: #334155; color: #fff; text-decoration: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.85rem;">
+        Back to Dashboard
+      </a>
+    </div>
+  </div>
+
+  <div class="flyer-wrapper">
+    <div class="flyer-badge">
+      <span>⭐ Google Verified Reviews</span>
+    </div>
+
+    <h1 class="flyer-title">{{ client.name }}</h1>
+    <div class="flyer-subtitle">{{ client.category }}</div>
+
+    <div class="flyer-stars">★★★★★</div>
+
+    <div class="flyer-qr-container">
+      <img src="/api/qr/{{ client.slug }}" alt="QR Code to review {{ client.name }}">
+    </div>
+
+    <div class="flyer-cta">
+      Scan with phone camera to review us on Google!
+    </div>
+    <p style="color: #64748b; font-size: 0.95rem; max-width: 440px; margin: 0 auto 1.25rem auto;">
+      We have prepared instant, 1-tap review suggestions so you don't even have to type. Takes only 10 seconds!
+    </p>
+
+    <div class="flyer-steps">
+      <div class="flyer-step">
+        <div class="step-num">1</div>
+        <div class="step-text"><strong>Scan QR</strong> with your phone camera</div>
+      </div>
+      <div class="flyer-step">
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>Pick a review draft</strong> or customize</div>
+      </div>
+      <div class="flyer-step">
+        <div class="step-num">3</div>
+        <div class="step-text"><strong>Paste &amp; Post</strong> 5 stars on Google</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 2rem; font-size: 0.75rem; color: #94a3b8;">
+      {{ review_url }}
+    </div>
+  </div>
+
+</body>
+</html>

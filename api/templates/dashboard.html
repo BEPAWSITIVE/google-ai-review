@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Review QR & AI Revert Generator</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="navbar">
+    <a href="/" class="nav-brand">
+      <div class="logo-icon">⭐</div>
+      <span>ReviewPulse AI</span>
+    </a>
+    <div class="nav-actions">
+      <button class="btn btn-secondary btn-sm" id="geminiApiKeyNavBtn" onclick="openSettingsModal()">
+        ⚙️ Gemini API: {{ masked_key if is_key_set else "Configure Key" }}
+      </button>
+      <button class="btn btn-primary btn-sm" onclick="openAddClientModal()">
+        + New Client
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+    <div class="dashboard-header">
+      <div>
+        <h1>Google Review QR Generator</h1>
+        <p>Boost your clients' 5-star Google reviews with keyword-rich AI suggestions.</p>
+      </div>
+      <div>
+        <button class="btn btn-primary" onclick="openAddClientModal()">
+          + Add New Business
+        </button>
+      </div>
+    </div>
+
+    <!-- Clients Grid -->
+    <div class="clients-grid">
+      {% for client in clients %}
+      <div class="client-card">
+        <div class="client-card-header">
+          <div>
+            <h3 class="client-title">{{ client.name }}</h3>
+            <span class="client-category">{{ client.category }}</span>
+          </div>
+        </div>
+
+        <!-- QR Code Preview -->
+        <div class="client-qr-preview">
+          <img src="/api/qr/{{ client.slug }}?d={{ client.payload }}" alt="QR Code for {{ client.name }}" loading="lazy">
+        </div>
+
+        <div class="client-keywords">
+          <strong>SEO Keywords:</strong>
+          <span>{{ client.keywords if client.keywords else "General service excellence" }}</span>
+        </div>
+
+        <div class="client-actions">
+          <button class="btn btn-primary btn-sm" onclick="openQrModal('{{ client.slug }}', '{{ client.name | replace("'", "\\'") }}', '{{ client.payload }}')">
+            📱 View QR & Flyer
+          </button>
+          <a href="/r/{{ client.slug }}?d={{ client.payload }}" target="_blank" class="btn btn-secondary btn-sm">
+            🔗 Test Review Page
+          </a>
+          <button class="btn btn-secondary btn-sm" onclick="openEditClientModal({{ client.id }})">
+            ✏️ Edit
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="deleteClient({{ client.id }}, '{{ client.name | replace("'", "\\'") }}')">
+            🗑️
+          </button>
+        </div>
+      </div>
+      {% else %}
+      <div style="grid-column: 1 / -1; background: #ffffff; border: 2px dashed #cbd5e1; border-radius: 16px; padding: 3rem 1.5rem; text-align: center;">
+        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🏬</div>
+        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">No Clients Added Yet</h3>
+        <p style="color: #64748b; margin-bottom: 1.25rem;">Create your first business profile to generate customized QR codes and AI review reverts.</p>
+        <button class="btn btn-primary" onclick="openAddClientModal()">+ Add Your First Client</button>
+      </div>
+      {% endfor %}
+    </div>
+  </main>
+
+  <!-- Client Add/Edit Modal -->
+  <div class="modal-overlay" id="clientModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Add New Client / Business</h2>
+        <button class="close-btn" onclick="closeModal('clientModal')">&times;</button>
+      </div>
+      <form id="clientForm">
+        <input type="hidden" id="clientId" value="">
+        
+        <div class="form-group">
+          <label class="form-label" for="clientName">Business / Client Name *</label>
+          <input type="text" id="clientName" class="form-input" placeholder="e.g. Apex Dental & Aesthetic Care" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="clientCategory">Industry / Category</label>
+          <input type="text" id="clientCategory" class="form-input" placeholder="e.g. Dental Clinic, Restaurant, Salon, Law Firm" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="googleReviewUrl">Google Review Direct Link *</label>
+          <input type="url" id="googleReviewUrl" class="form-input" placeholder="https://search.google.com/local/writereview?placeid=... or https://g.page/r/.../review" required>
+          <div class="form-hint">Find this in your Google Business Profile &gt; "Ask for reviews" link.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="keywords">Target SEO Keywords (Comma Separated)</label>
+          <textarea id="keywords" class="form-textarea" rows="2" placeholder="e.g. painless teeth cleaning, gentle dentists, hygienic clinic, best root canal, clear pricing"></textarea>
+          <div class="form-hint">Gemini AI will naturally weave these phrases into the 5-10 review drafts to rank higher on Google Maps.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="highlights">Customer Highlight Tags (Comma Separated)</label>
+          <input type="text" id="highlights" class="form-input" placeholder="e.g. Painless Treatment, Gentle Staff, Clean Clinic, Quick Booking, Great Doctor">
+          <div class="form-hint">These tags appear as clickable pills on the customer's phone to personalize review options.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="brandColor">Brand Color</label>
+          <input type="color" id="brandColor" class="form-input" style="height: 40px; padding: 2px 6px;" value="#2563eb">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="welcomeMsg">Welcome Greeting for Customer</label>
+          <textarea id="welcomeMsg" class="form-textarea" rows="2" placeholder="e.g. We hope you had a comfortable visit! Help others discover our gentle care by sharing a quick review."></textarea>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('clientModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveClientBtn">Save Client &amp; Generate QR</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- QR Code & Flyer Preview Modal -->
+  <div class="modal-overlay" id="qrModal">
+    <div class="modal-box" style="max-width: 480px; text-align: center;">
+      <div class="modal-header">
+        <h2 class="modal-title" id="qrModalBizName">Business QR Code</h2>
+        <button class="close-btn" onclick="closeModal('qrModal')">&times;</button>
+      </div>
+      
+      <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1rem;">
+        Customers scan this QR code on their phone to access AI review suggestions and paste directly onto Google.
+      </p>
+
+      <div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; display: inline-block; margin-bottom: 1.25rem;">
+        <img id="qrModalImage" src="" alt="QR Code" style="width: 200px; height: 200px; display: block; margin: 0 auto;">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" style="text-align: left;">Direct Review Helper URL:</label>
+        <div style="display: flex; gap: 0.5rem;">
+          <input type="text" id="qrModalLinkInput" class="form-input" readonly>
+          <button class="btn btn-secondary btn-sm" onclick="copyQrModalLink()">📋 Copy</button>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem;">
+        <a id="qrDownloadBtn" href="" download="" class="btn btn-primary">
+          💾 Download QR PNG
+        </a>
+        <a id="qrFlyerBtn" href="" target="_blank" class="btn btn-secondary">
+          🖨️ Printable Table Tent Flyer
+        </a>
+        <a id="qrTestBtn" href="" target="_blank" class="btn btn-secondary">
+          📱 Open Mobile View
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal (Gemini API Key) -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-box" style="max-width: 480px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Gemini API Key Settings</h2>
+        <button class="close-btn" onclick="closeModal('settingsModal')">&times;</button>
+      </div>
+      <form id="settingsForm">
+        <p style="color: #64748b; font-size: 0.88rem; margin-bottom: 1.2rem; line-height: 1.4;">
+          The app uses Google's Gemini Flash model to dynamically craft personalized, 5-star review reverts for each business and its target keywords.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label" for="geminiApiKeyInput">Google Gemini API Key</label>
+          <input type="password" id="geminiApiKeyInput" class="form-input" placeholder="AIzaSy..." value="{{ masked_key if is_key_set else '' }}">
+          <div class="form-hint">
+            Get a free key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a>. (If left blank, smart keyword templates will be used).
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('settingsModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save API Key</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
